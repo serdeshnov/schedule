@@ -1,0 +1,30 @@
+name: Обновление расписания
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"   # каждые 3 часа (время UTC)
+  workflow_dispatch:         # кнопка ручного запуска во вкладке Actions
+
+permissions:
+  contents: write            # чтобы бот мог закоммитить обновлённый schedule.ics
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Скачать расписание и собрать ICS
+        run: python sync_schedule.py docs/schedule.ics
+
+      - name: Закоммитить, если файл изменился
+        run: |
+          git config user.name "schedule-bot"
+          git config user.email "schedule-bot@users.noreply.github.com"
+          git add docs/schedule.ics
+          git diff --cached --quiet || git commit -m "Обновлено расписание"
+          git push
