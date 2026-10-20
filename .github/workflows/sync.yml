@@ -2,7 +2,7 @@ name: Обновление расписания
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # каждые 3 часа (время UTC)
+    - cron: "0 * * * *"   # каждый час (время UTC)
   workflow_dispatch:         # кнопка ручного запуска во вкладке Actions
 
 permissions:
