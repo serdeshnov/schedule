@@ -56,12 +56,14 @@ def fetch_text(opener, url, data=None, headers=None):
 
 def get_csrf_token(page_html):
     """Достаёт значение скрытого поля _token из формы."""
-    match = re.search(r'name="_token"\s+value="([^"]+)"', page_html)
-    if not match:
-        match = re.search(r'value="([^"]+)"\s+name="_token"', page_html)
-    if not match:
-        raise RuntimeError("Не нашёл _token на странице расписания — вёрстка сайта изменилась?")
-    return match.group(1)
+    # Берём тег <input ...> с name="_token" и достаём из него value — порядок атрибутов
+    # не важен (на сайте это <input name="_token" type="hidden" value="...">)
+    for tag in re.findall(r"<input[^>]*>", page_html):
+        if re.search(r'name=["\']_token["\']', tag):
+            value = re.search(r'value=["\']([^"\']+)["\']', tag)
+            if value:
+                return value.group(1)
+    raise RuntimeError("Не нашёл _token на странице расписания — вёрстка сайта изменилась?")
 
 
 def find_group_id(opener, group_name):
